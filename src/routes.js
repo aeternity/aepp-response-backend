@@ -15,7 +15,8 @@ routes.get('/search', async (req, res, next) => {
 
   const users = (await twitter.get('users/search', { q, count: verified ? 20 : 5 }))
     .filter(user => !verified || user.verified)
-    .map(({ name, screen_name }) => ({ name, screen_name }));
+    .map(({ name, screen_name }) => ({ name, screen_name }))
+    .slice(0, 5);
 
   res.json(users);
 });
