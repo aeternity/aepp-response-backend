@@ -38,6 +38,7 @@
     "body-parser": "^1.17.1",
     "cors": "^2.8.4",
     "express": "^4.15.2",
+    "memoizee": "^0.4.11",
     "morgan": "^1.7.0",
     "pug": "^2.0.0-beta11",
     "rimraf": "^2.6.1",
