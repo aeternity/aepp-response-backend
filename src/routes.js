@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import memoize from 'memoizee';
-import twitter from './twitter';
+import { twitter } from './twitter';
 
 const routes = Router();
 const usersSearch = memoize((q, count) => twitter.get('users/search', { q, count }));
