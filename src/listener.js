@@ -100,6 +100,6 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
     }
     questions[id].deadline = deadline;
     questions[id].answered = !!tweetId;
-    if (questions[id].answered || questions[id].deadline < new Date()) reopenStream();
+    reopenStream();
   });
 })();
