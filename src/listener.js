@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import pluralize from 'pluralize';
 import _ from 'lodash';
 import { twitter, userId } from './twitter';
@@ -25,6 +27,19 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
 (async () => {
   const questions = {};
   let stream;
+
+  setInterval(async () => {
+    const {
+      resources: {
+        statuses: { '/statuses/user_timeline': timeLine },
+        users: { '/users/search': usersSearch },
+      },
+    } = await twitter.get('application/rate_limit_status', {});
+    console.log(
+      `rate limits: timeLine ${timeLine.remaining}, search ${usersSearch.remaining},`,
+      'reset at', (new Date(usersSearch.reset * 1000)).toISOString().slice(11, 16),
+    );
+  }, 10 * 1000);
 
   const addTweet = ({ id_str, entities: { user_mentions, urls } }) => {
     questions[urls.pop().expanded_url.split('/').pop()] = {
