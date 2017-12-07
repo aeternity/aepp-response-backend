@@ -50,56 +50,75 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
   };
 
   const reopenStream = _.throttle(() => {
-    if (stream) stream.destroy();
-    const follow = Array.from(new Set(Object.keys(questions)
-      .map(questionId => questions[questionId])
-      .filter(question => !question.answered && question.deadline > new Date())
-      .map(question => question.askedTwitterUserId))).join(',');
-    if (!follow.length) return;
-    stream = twitter.stream('statuses/filter', { follow });
-    stream.on('data', async (tweet) => {
-      if (tweet.in_reply_to_user_id_str !== userId) return;
-      if (
-        !tweet.entities.urls.find(url =>
-          /https?:\/\/(www\.)?(youtube|vimeo)\.com/.test(url.expanded_url)) &&
-        !(tweet.extended_entities &&
-          tweet.extended_entities.media.find(media => media.type === 'video'))
-      ) return;
-      const questionId = Object.keys(questions).find(qId =>
-        questions[qId].questionTweetId === tweet.in_reply_to_status_id_str);
-      if (!questionId) return;
-      const question = questions[questionId];
-      if (
-        question.askedTwitterUserId !== tweet.user.id_str ||
-        question.answered ||
-        question.deadline < new Date()
-      ) return;
-      await setQuestionAnswer(questionId, tweet.id_str);
-      questions[questionId].answered = true;
-      reopenStream();
-    });
+    try {
+      if (stream) stream.destroy();
+      const follow = Array.from(new Set(Object.keys(questions)
+        .map(questionId => questions[questionId])
+        .filter(question => !question.answered && question.deadline > new Date())
+        .map(question => question.askedTwitterUserId))).join(',');
+      if (!follow.length) return;
+      stream = twitter.stream('statuses/filter', { follow });
+      stream.on('data', async (tweet) => {
+        try {
+          if (tweet.in_reply_to_user_id_str !== userId) return;
+          if (
+            !tweet.entities.urls.find(url =>
+              /https?:\/\/(www\.)?(youtube|vimeo)\.com/.test(url.expanded_url)) &&
+            !(tweet.extended_entities &&
+              tweet.extended_entities.media.find(media => media.type === 'video'))
+          ) return;
+          const questionId = Object.keys(questions).find(qId =>
+            questions[qId].questionTweetId === tweet.in_reply_to_status_id_str);
+          if (!questionId) return;
+          const question = questions[questionId];
+          if (
+            question.askedTwitterUserId !== tweet.user.id_str ||
+            question.answered ||
+            question.deadline < new Date()
+          ) return;
+          await setQuestionAnswer(questionId, tweet.id_str);
+          questions[questionId].answered = true;
+          console.log('reply tweet', questionId, tweet.id_str);
+        } catch (e) {
+          console.error('reply tweet failed', e);
+        }
+        reopenStream();
+      });
+      stream.on('error', e => console.log('stream error', e));
+      console.log('stream follow', follow);
+    } catch (e) {
+      console.log('stream failed', e);
+    }
   }, 10000);
 
-  (await twitter.get('statuses/user_timeline', {
+  const tweets = (await twitter.get('statuses/user_timeline', {
     user_id: userId,
     trim_user: true,
     tweet_mode: 'extended',
   }))
-    .filter(({ full_text }) => tweetRegexp.test(full_text))
-    .forEach(addTweet);
+    .filter(({ full_text }) => tweetRegexp.test(full_text));
+  console.log('fetched', tweets.length, 'tweets');
+  tweets.forEach(addTweet);
   reopenStream();
 
   await subscribeForQuestions(async ({
     account, title, amount, id, foundationId, deadline, tweetId,
   }) => {
-    if (!questions[id]) {
-      addTweet(await twitter.post('statuses/update', {
-        status: tweetTemplate(account, title, amount, foundations[foundationId].name, id),
-        tweet_mode: 'extended',
-      }));
+    try {
+      if (!questions[id]) {
+        addTweet(await twitter.post('statuses/update', {
+          status: tweetTemplate(account, title, amount, foundations[foundationId].name, id),
+          tweet_mode: 'extended',
+        }));
+      }
+      questions[id].deadline = deadline;
+      questions[id].answered = !!tweetId;
+      reopenStream();
+      console.log('question contract', id);
+    } catch (e) {
+      console.error('question contract failed', e);
     }
-    questions[id].deadline = deadline;
-    questions[id].answered = !!tweetId;
-    reopenStream();
   });
-})();
+
+  console.log('listener running');
+})().catch(e => console.error('listener error', e));
