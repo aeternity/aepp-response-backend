@@ -16,7 +16,7 @@ routes.get('/search', async (req, res, next) => {
   }
 
   const users = (await usersSearch(q, verified ? 20 : 5))
-    .filter(user => !verified || user.verified)
+    .filter(user => !+verified || user.verified)
     .map(({ name, screen_name }) => ({ name, screen_name }))
     .slice(0, 5);
 
