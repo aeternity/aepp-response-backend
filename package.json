@@ -42,6 +42,7 @@
     "ethjs-provider-signer": "^0.1.4",
     "ethjs-signer": "^0.1.1",
     "express": "^4.15.2",
+    "express-promise-router": "^2.0.0",
     "ipfs-mini": "^1.1.2",
     "lodash": "^4.17.4",
     "memoizee": "^0.4.11",
