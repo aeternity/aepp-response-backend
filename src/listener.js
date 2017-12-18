@@ -2,6 +2,7 @@
 
 import pluralize from 'pluralize';
 import _ from 'lodash';
+import fetch from 'node-fetch';
 import { twitter, userId, usersShow } from './twitter';
 import { subscribeForQuestions, setQuestionAnswer } from './ethereum';
 
@@ -15,12 +16,12 @@ const foundations = {
     url: 'http://example.com/',
   },
 };
-const tweetRegexp = /^@\S+, .+\n\n\(Reply to this via a video answer and \S+ Æ \w+ will get donated to .+\. Go here for more info \S+\)$/;
-const tweetTemplate = (account, title, amount, foundationName, questionId) =>
+const tweetRegexp = /^@\S+, .+\n\n\(Reply to this via a video answer and \S+ Æ \w+ \(\$\S+ USD\) will get donated to .+\. Go here for more info \S+\)$/;
+const tweetTemplate = (account, title, amount, amountInUSD, foundationName, questionId) =>
   [
     `@${account}, ${title}\n\n`,
     `(Reply to this via a video answer and ${pluralize('Æ token', amount, true)} `,
-    `will get donated to ${foundationName}. `,
+    `($${amountInUSD} USD) will get donated to ${foundationName}. `,
     `Go here for more info https://response.aepps.com/question/${questionId})`,
   ].join('');
 
@@ -107,8 +108,11 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
     try {
       if (!questions[id]) {
         const { screen_name } = await usersShow(twitterUserId);
+        const r = await fetch('https://min-api.cryptocompare.com/data/price?fsym=AE&tsyms=USD');
+        const { USD } = await r.json();
+        const foundation = foundations[foundationId].name;
         addTweet(await twitter.post('statuses/update', {
-          status: tweetTemplate(screen_name, title, amount, foundations[foundationId].name, id),
+          status: tweetTemplate(screen_name, title, amount, USD * amount, foundation, id),
           tweet_mode: 'extended',
         }));
       }
