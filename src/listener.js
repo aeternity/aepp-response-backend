@@ -2,7 +2,7 @@
 
 import pluralize from 'pluralize';
 import _ from 'lodash';
-import { twitter, userId } from './twitter';
+import { twitter, userId, usersShow } from './twitter';
 import { subscribeForQuestions, setQuestionAnswer } from './ethereum';
 
 const foundations = {
@@ -44,8 +44,8 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
   const addTweet = ({ id_str, entities: { user_mentions, urls } }) => {
     questions[urls.pop().expanded_url.split('/').pop()] = {
       questionTweetId: id_str,
-      askedTwitterUserId: user_mentions[0].id_str,
-      deadline: new Date(Date.now() + (60 * 60 * 1000)),
+      twitterUserId: user_mentions[0].id_str,
+      deadlineAt: new Date(Date.now() + (60 * 60 * 1000)),
     };
   };
 
@@ -54,8 +54,8 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
       if (stream) stream.destroy();
       const follow = Array.from(new Set(Object.keys(questions)
         .map(questionId => questions[questionId])
-        .filter(question => !question.answered && question.deadline > new Date())
-        .map(question => question.askedTwitterUserId))).join(',');
+        .filter(question => !question.answered && question.deadlineAt > new Date())
+        .map(question => question.twitterUserId))).join(',');
       if (!follow.length) return;
       stream = twitter.stream('statuses/filter', { follow });
       stream.on('data', async (tweet) => {
@@ -72,9 +72,9 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
           if (!questionId) return;
           const question = questions[questionId];
           if (
-            question.askedTwitterUserId !== tweet.user.id_str ||
+            question.twitterUserId !== tweet.user.id_str ||
             question.answered ||
-            question.deadline < new Date()
+            question.deadlineAt < new Date()
           ) return;
           await setQuestionAnswer(questionId, tweet.id_str);
           questions[questionId].answered = true;
@@ -102,19 +102,20 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
   reopenStream();
 
   await subscribeForQuestions(async ({
-    account, title, amount, id, foundationId, deadline, tweetId,
+    id, twitterUserId, amount, title, deadlineAt, tweetId, foundationId,
   }) => {
     try {
       if (!questions[id]) {
+        const { screen_name } = await usersShow(twitterUserId);
         addTweet(await twitter.post('statuses/update', {
-          status: tweetTemplate(account, title, amount, foundations[foundationId].name, id),
+          status: tweetTemplate(screen_name, title, amount, foundations[foundationId].name, id),
           tweet_mode: 'extended',
         }));
       }
-      questions[id].deadline = deadline;
+      questions[id].deadlineAt = deadlineAt;
       questions[id].answered = !!tweetId;
       reopenStream();
-      console.log('question contract', id);
+      console.log('question contract', id, questions[id].questionTweetId);
     } catch (e) {
       console.error('question contract failed', e);
     }

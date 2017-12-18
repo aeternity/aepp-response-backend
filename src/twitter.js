@@ -1,4 +1,5 @@
 import Twitter from 'twitter';
+import memoize from 'memoizee';
 
 const {
   TWITTER_CONSUMER_KEY,
@@ -15,3 +16,8 @@ export const twitter = new Twitter({
 });
 
 export const userId = TWITTER_ACCESS_TOKEN_KEY.split('-')[0];
+
+export const usersSearch = memoize((q, count) => twitter.get('users/search', { q, count }));
+
+export const usersShow = memoize(uId =>
+  twitter.get('users/show', { user_id: uId, include_entities: false }));

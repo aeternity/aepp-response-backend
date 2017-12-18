@@ -1,12 +1,7 @@
 import Router from 'express-promise-router';
-import memoize from 'memoizee';
-import { twitter } from './twitter';
+import { usersSearch, usersShow } from './twitter';
 
 const routes = Router();
-
-const usersSearch = memoize((q, count) => twitter.get('users/search', { q, count }));
-const usersShow = memoize(userId =>
-  twitter.get('users/show', { user_id: userId, include_entities: false }));
 
 const transformUser = ({
   id_str,
