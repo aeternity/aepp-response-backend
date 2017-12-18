@@ -89,7 +89,7 @@ const tweetTemplate = (account, title, amount, foundationName, questionId) =>
     } catch (e) {
       console.log('stream failed', e);
     }
-  }, 10000);
+  }, 10000, { leading: false });
 
   const tweets = (await twitter.get('statuses/user_timeline', {
     user_id: userId,
