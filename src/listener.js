@@ -16,13 +16,13 @@ const foundations = {
     url: 'http://example.com/',
   },
 };
-const tweetRegexp = /^@\S+, .+\n\n\(Reply to this via a video answer and \S+ Æ \w+ \(\$\S+ USD\) will get donated to .+\. Go here for more info \S+\)$/;
+const tweetRegexp = /^@\S+, .+\n\nReply to this via a video answer and \S+ Æ \w+ \(\$\S+ USD\) will get donated to .+\. Go here for more info \S+$/;
 const tweetTemplate = (account, title, amount, amountInUSD, foundationName, questionId) =>
   [
     `@${account}, ${title}\n\n`,
-    `(Reply to this via a video answer and ${pluralize('Æ token', amount, true)} `,
+    `Reply to this via a video answer and ${pluralize('Æ token', amount, true)} `,
     `($${amountInUSD} USD) will get donated to ${foundationName}. `,
-    `Go here for more info https://response.aepps.com/question/${questionId})`,
+    `Go here for more info https://response.aepps.com/question/${questionId}`,
   ].join('');
 
 (async () => {
