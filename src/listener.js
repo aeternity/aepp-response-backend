@@ -85,10 +85,10 @@ const tweetTemplate = (account, title, amount, amountInUSD, foundationName, ques
         }
         reopenStream();
       });
-      stream.on('error', e => console.log('stream error', e));
+      stream.on('error', e => console.error('stream error', e));
       console.log('stream follow', follow);
     } catch (e) {
-      console.log('stream failed', e);
+      console.error('stream failed', e);
     }
   }, 10000, { leading: false });
 
