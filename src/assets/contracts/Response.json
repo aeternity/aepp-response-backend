@@ -58,6 +58,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "backendFee",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "questionCount",
       "outputs": [
         {
@@ -104,7 +118,11 @@
           "type": "uint256"
         },
         {
-          "name": "tweetId",
+          "name": "questionTweetId",
+          "type": "uint256"
+        },
+        {
+          "name": "answerTweetId",
           "type": "uint256"
         },
         {
@@ -124,41 +142,30 @@
       "constant": false,
       "inputs": [
         {
-          "name": "questionIdx",
+          "name": "twitterUserId",
           "type": "uint256"
         },
         {
-          "name": "tweetId",
-          "type": "uint256"
-        }
-      ],
-      "name": "answer",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "questionIdx",
-          "type": "uint256"
+          "name": "content",
+          "type": "string"
         },
         {
-          "name": "supporterAddress",
+          "name": "foundation",
           "type": "address"
-        }
-      ],
-      "name": "isSupportReverted",
-      "outputs": [
+        },
         {
-          "name": "",
-          "type": "bool"
+          "name": "deadlineAt",
+          "type": "uint256"
+        },
+        {
+          "name": "amount",
+          "type": "uint256"
         }
       ],
-      "payable": false,
-      "stateMutability": "view",
+      "name": "createQuestion",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -205,6 +212,20 @@
       "constant": false,
       "inputs": [
         {
+          "name": "_backendFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "setBackendFee",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "foundation",
           "type": "address"
         },
@@ -223,6 +244,24 @@
       "constant": false,
       "inputs": [
         {
+          "name": "questionIdx",
+          "type": "uint256"
+        },
+        {
+          "name": "questionTweetId",
+          "type": "uint256"
+        }
+      ],
+      "name": "setQuestionTweetId",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "_backend",
           "type": "address"
         }
@@ -231,6 +270,47 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "questionIdx",
+          "type": "uint256"
+        },
+        {
+          "name": "answerTweetId",
+          "type": "uint256"
+        }
+      ],
+      "name": "setAnswerTweetId",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "questionIdx",
+          "type": "uint256"
+        },
+        {
+          "name": "supporterAddress",
+          "type": "address"
+        }
+      ],
+      "name": "supportRevertedAt",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -253,9 +333,9 @@
     "42": {
       "events": {},
       "links": {},
-      "address": "0xb53ad96b2f6922d992b9f7a1627470a5ae383bf2"
+      "address": "0x9a6309750ae42703e8e78a8aee5457851564e433"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-12-18T09:02:12.905Z"
+  "updatedAt": "2018-01-04T08:32:14.521Z"
 }

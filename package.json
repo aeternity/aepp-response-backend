@@ -34,6 +34,7 @@
   "dependencies": {
     "babel-cli": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.4.0",
     "bignumber.js": "^5.0.0",
     "bluebird": "^3.5.1",
@@ -80,7 +81,8 @@
       ]
     ],
     "plugins": [
-      "transform-object-rest-spread"
+      "transform-object-rest-spread",
+      "transform-runtime"
     ]
   },
   "eslintConfig": {

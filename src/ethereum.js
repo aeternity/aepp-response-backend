@@ -45,7 +45,7 @@ export const subscribeForQuestions = async (handler) => {
         const idx = i + fetchedQuestionCount;
         const {
           twitterUserId, content, foundation,
-          deadlineAt, tweetId, amount,
+          deadlineAt, questionTweetId, answerTweetId, amount,
         } = { ...await response.methods.questions(idx).call() };
         handler({
           id: String(idx),
@@ -53,7 +53,8 @@ export const subscribeForQuestions = async (handler) => {
           amount: +(new BigNumber(amount)).shift(-decimals),
           title: (await ipfs.catJSONAsync(content)).title,
           deadlineAt: new Date(deadlineAt * 1000),
-          tweetId: tweetId === '0' ? 0 : tweetId,
+          questionTweetId: questionTweetId === '0' ? 0 : questionTweetId,
+          answerTweetId: answerTweetId === '0' ? 0 : answerTweetId,
           foundationId: foundation,
         });
       }));
@@ -69,8 +70,14 @@ export const subscribeForQuestions = async (handler) => {
   setInterval(fetchQuestions, 15 * 1000);
 };
 
-export const setQuestionAnswer = (questionIdx, tweetId) =>
-  response.methods.answer(questionIdx, tweetId).send({
+export const setQuestionTweetId = (questionIdx, tweetId) =>
+  response.methods.setQuestionTweetId(questionIdx, tweetId).send({
+    from: WEB3_ACCOUNT_ADDRESS,
+    gas: 100000,
+  });
+
+export const setAnswerTweetId = (questionIdx, tweetId) =>
+  response.methods.setAnswerTweetId(questionIdx, tweetId).send({
     from: WEB3_ACCOUNT_ADDRESS,
     gas: 100000,
   });
