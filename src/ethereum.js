@@ -21,6 +21,10 @@ const web3 = new Web3(new SignerProvider(WEB3_PROVIDER_URL, {
 }));
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 const decimals = 18;
+const sendOptions = {
+  from: WEB3_ACCOUNT_ADDRESS,
+  gas: 100000,
+};
 let response;
 
 ipfs.addJSONAsync = Bluebird.promisify(ipfs.addJSON);
@@ -32,6 +36,26 @@ export const subscribeForQuestions = async (handler) => {
   const responseAddress = Response.networks[networkId].address;
   console.log('registry address', responseAddress);
   response = new web3.eth.Contract(Response.abi, responseAddress);
+
+  const updateBackendFee = async () => {
+    try {
+      sendOptions.gasPrice = await web3.eth.getGasPrice();
+      const backendFee = await response.methods.backendFee().call();
+      const newBackendFee = (new BigNumber(sendOptions.gasPrice)).mul(2).mul(sendOptions.gas);
+      if (newBackendFee !== backendFee) {
+        await response.methods.setBackendFee(newBackendFee).send(sendOptions);
+      }
+      console.log(
+        'update backend fee', +newBackendFee.shift(-decimals),
+        'gasPrice', sendOptions.gasPrice,
+      );
+    } catch (e) {
+      console.error('update backend fee failed', e);
+    }
+  };
+
+  await updateBackendFee();
+  setInterval(updateBackendFee, 24 * 60 * 60 * 1000);
 
   let fetchedQuestionCount = 0;
   const fetchQuestions = async () => {
@@ -71,13 +95,7 @@ export const subscribeForQuestions = async (handler) => {
 };
 
 export const setQuestionTweetId = (questionIdx, tweetId) =>
-  response.methods.setQuestionTweetId(questionIdx, tweetId).send({
-    from: WEB3_ACCOUNT_ADDRESS,
-    gas: 100000,
-  });
+  response.methods.setQuestionTweetId(questionIdx, tweetId).send(sendOptions);
 
 export const setAnswerTweetId = (questionIdx, tweetId) =>
-  response.methods.setAnswerTweetId(questionIdx, tweetId).send({
-    from: WEB3_ACCOUNT_ADDRESS,
-    gas: 100000,
-  });
+  response.methods.setAnswerTweetId(questionIdx, tweetId).send(sendOptions);
