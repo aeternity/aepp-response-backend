@@ -48,13 +48,10 @@ export const subscribeForQuestions = async (handler) => {
       const backendFee = await response.methods.backendFee().call();
       const newBackendFee = (new BigNumber(sendOptions.gasPrice))
         .mul(setQuestionTweetIdGasLimit + setAnswerTweetIdGasLimit);
-      if (newBackendFee !== backendFee) {
+      if (!newBackendFee.equals(backendFee)) {
         await response.methods.setBackendFee(newBackendFee).send(sendOptions);
+        console.log('update backend fee', +newBackendFee.shift(-decimals));
       }
-      console.log(
-        'update backend fee', +newBackendFee.shift(-decimals),
-        'gasPrice', sendOptions.gasPrice,
-      );
     } catch (e) {
       console.error('update backend fee failed', e);
     }
