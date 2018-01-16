@@ -5,7 +5,7 @@
       "constant": true,
       "inputs": [
         {
-          "name": "questionIdx",
+          "name": "qIdx",
           "type": "uint256"
         },
         {
@@ -16,15 +16,15 @@
       "name": "highestSupporter",
       "outputs": [
         {
-          "name": "",
+          "name": "account",
           "type": "address"
         },
         {
-          "name": "",
+          "name": "lastSupportAt",
           "type": "uint256"
         },
         {
-          "name": "",
+          "name": "amount",
           "type": "uint256"
         }
       ],
@@ -36,7 +36,7 @@
       "constant": true,
       "inputs": [
         {
-          "name": "questionIdx",
+          "name": "qIdx",
           "type": "uint256"
         },
         {
@@ -87,7 +87,7 @@
       "constant": true,
       "inputs": [
         {
-          "name": "",
+          "name": "qIdx",
           "type": "uint256"
         }
       ],
@@ -99,7 +99,7 @@
         },
         {
           "name": "content",
-          "type": "string"
+          "type": "bytes32"
         },
         {
           "name": "author",
@@ -114,16 +114,12 @@
           "type": "uint256"
         },
         {
-          "name": "deadlineAt",
+          "name": "tweetId",
           "type": "uint256"
         },
         {
-          "name": "questionTweetId",
-          "type": "uint256"
-        },
-        {
-          "name": "answerTweetId",
-          "type": "uint256"
+          "name": "answered",
+          "type": "bool"
         },
         {
           "name": "supporterCount",
@@ -142,30 +138,18 @@
       "constant": false,
       "inputs": [
         {
-          "name": "twitterUserId",
+          "name": "qIdx",
           "type": "uint256"
         },
         {
-          "name": "content",
-          "type": "string"
-        },
-        {
-          "name": "foundation",
-          "type": "address"
-        },
-        {
-          "name": "deadlineAt",
-          "type": "uint256"
-        },
-        {
-          "name": "amount",
-          "type": "uint256"
+          "name": "answerTweetId",
+          "type": "uint64"
         }
       ],
-      "name": "createQuestion",
+      "name": "setAnswerTweetId",
       "outputs": [],
-      "payable": true,
-      "stateMutability": "payable",
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -198,7 +182,7 @@
       "constant": false,
       "inputs": [
         {
-          "name": "questionIdx",
+          "name": "qIdx",
           "type": "uint256"
         }
       ],
@@ -244,25 +228,7 @@
       "constant": false,
       "inputs": [
         {
-          "name": "questionIdx",
-          "type": "uint256"
-        },
-        {
-          "name": "questionTweetId",
-          "type": "uint256"
-        }
-      ],
-      "name": "setQuestionTweetId",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_backend",
+          "name": "backend",
           "type": "address"
         }
       ],
@@ -276,15 +242,41 @@
       "constant": false,
       "inputs": [
         {
-          "name": "questionIdx",
-          "type": "uint256"
+          "name": "twitterUserId",
+          "type": "uint64"
         },
         {
-          "name": "answerTweetId",
+          "name": "content",
+          "type": "bytes32"
+        },
+        {
+          "name": "foundation",
+          "type": "address"
+        },
+        {
+          "name": "amount",
           "type": "uint256"
         }
       ],
-      "name": "setAnswerTweetId",
+      "name": "createQuestion",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "qIdx",
+          "type": "uint256"
+        },
+        {
+          "name": "questionTweetId",
+          "type": "uint64"
+        }
+      ],
+      "name": "setQuestionTweetId",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -294,7 +286,7 @@
       "constant": true,
       "inputs": [
         {
-          "name": "questionIdx",
+          "name": "qIdx",
           "type": "uint256"
         },
         {
@@ -316,6 +308,10 @@
     {
       "inputs": [
         {
+          "name": "store",
+          "type": "address"
+        },
+        {
           "name": "_token",
           "type": "address"
         }
@@ -333,9 +329,9 @@
     "42": {
       "events": {},
       "links": {},
-      "address": "0x9a6309750ae42703e8e78a8aee5457851564e433"
+      "address": "0x598ab01cfa3dc2c28d3f18c86429945d3888a830"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-01-04T08:32:14.521Z"
+  "updatedAt": "2018-01-16T20:26:10.319Z"
 }

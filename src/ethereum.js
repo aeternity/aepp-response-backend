@@ -7,6 +7,7 @@ import _ from 'lodash';
 import IPFS from 'ipfs-mini';
 import Bluebird from 'bluebird';
 import BigNumber from 'bignumber.js';
+import bs58 from 'bs58';
 import Response from './assets/contracts/Response.json';
 
 const {
@@ -21,14 +22,18 @@ const web3 = new Web3(new SignerProvider(WEB3_PROVIDER_URL, {
 }));
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 const decimals = 18;
+const setQuestionTweetIdGasLimit = 43000;
+const setAnswerTweetIdGasLimit = 70000;
 const sendOptions = {
   from: WEB3_ACCOUNT_ADDRESS,
   gas: 100000,
 };
 let response;
 
-ipfs.addJSONAsync = Bluebird.promisify(ipfs.addJSON);
 ipfs.catJSONAsync = Bluebird.promisify(ipfs.catJSON);
+
+const getQuestionContent = ipfsHash =>
+  ipfs.catJSONAsync(bs58.encode(Buffer.from(`1220${ipfsHash.slice(2)}`, 'hex')));
 
 export const subscribeForQuestions = async (handler) => {
   const networkId = await web3.eth.net.getId();
@@ -41,7 +46,8 @@ export const subscribeForQuestions = async (handler) => {
     try {
       sendOptions.gasPrice = await web3.eth.getGasPrice();
       const backendFee = await response.methods.backendFee().call();
-      const newBackendFee = (new BigNumber(sendOptions.gasPrice)).mul(2).mul(sendOptions.gas);
+      const newBackendFee = (new BigNumber(sendOptions.gasPrice))
+        .mul(setQuestionTweetIdGasLimit + setAnswerTweetIdGasLimit);
       if (newBackendFee !== backendFee) {
         await response.methods.setBackendFee(newBackendFee).send(sendOptions);
       }
@@ -69,16 +75,16 @@ export const subscribeForQuestions = async (handler) => {
         const idx = i + fetchedQuestionCount;
         const {
           twitterUserId, content, foundation,
-          deadlineAt, questionTweetId, answerTweetId, amount,
+          createdAt, tweetId, answered, amount,
         } = { ...await response.methods.questions(idx).call() };
         handler({
           id: String(idx),
           twitterUserId,
           amount: +(new BigNumber(amount)).shift(-decimals),
-          title: (await ipfs.catJSONAsync(content)).title,
-          deadlineAt: new Date(deadlineAt * 1000),
-          questionTweetId: questionTweetId === '0' ? 0 : questionTweetId,
-          answerTweetId: answerTweetId === '0' ? 0 : answerTweetId,
+          title: (await getQuestionContent(content)).title,
+          createdAt: new Date(createdAt * 1000),
+          tweetId: tweetId === '0' ? 0 : tweetId,
+          answered,
           foundationId: foundation,
         });
       }));
@@ -95,7 +101,9 @@ export const subscribeForQuestions = async (handler) => {
 };
 
 export const setQuestionTweetId = (questionIdx, tweetId) =>
-  response.methods.setQuestionTweetId(questionIdx, tweetId).send(sendOptions);
+  response.methods.setQuestionTweetId(questionIdx, tweetId)
+    .send({ ...sendOptions, gas: setQuestionTweetIdGasLimit });
 
 export const setAnswerTweetId = (questionIdx, tweetId) =>
-  response.methods.setAnswerTweetId(questionIdx, tweetId).send(sendOptions);
+  response.methods.setAnswerTweetId(questionIdx, tweetId)
+    .send({ ...sendOptions, gas: setAnswerTweetIdGasLimit });

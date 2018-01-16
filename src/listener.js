@@ -23,6 +23,12 @@ const tweetTemplate = (account, title, amount, amountInUSD, foundationName, ques
     `($${amountInUSD} USD) will get donated to ${foundationName}. `,
     `Go here for more info https://response.aepps.com/question/${questionId}`,
   ].join('');
+const month = 30 * 24 * 60 * 60 * 1000;
+const getDeadlineAt = (createdAt) => {
+  const d = new Date(createdAt);
+  d.setDate(d.getDate() + 30);
+  return d;
+};
 
 (async () => {
   const questions = {};
@@ -61,7 +67,7 @@ const tweetTemplate = (account, title, amount, amountInUSD, foundationName, ques
               tweet.extended_entities.media.find(media => media.type === 'video'))
           ) return;
           const questionId = Object.keys(questions).find(qId =>
-            questions[qId].questionTweetId === tweet.in_reply_to_status_id_str);
+            questions[qId].tweetId === tweet.in_reply_to_status_id_str);
           if (!questionId) return;
           const question = questions[questionId];
           if (question.deadlineAt < new Date()) {
@@ -87,22 +93,23 @@ const tweetTemplate = (account, title, amount, amountInUSD, foundationName, ques
   reopenStream();
 
   await subscribeForQuestions(async ({
-    id, twitterUserId, amount, title, deadlineAt, questionTweetId, answerTweetId, foundationId,
+    id, twitterUserId, amount, title, createdAt, tweetId, answered, foundationId,
   }) => {
     try {
-      if (!answerTweetId && deadlineAt > new Date()) {
-        questions[id] = { twitterUserId, deadlineAt, questionTweetId };
-        if (!questions[id].questionTweetId) {
+      const deadlineAt = getDeadlineAt(createdAt);
+      if (!answered && deadlineAt > new Date()) {
+        questions[id] = { twitterUserId, deadlineAt, tweetId };
+        if (!questions[id].tweetId) {
           const { screen_name: screenName } = await usersShow(twitterUserId);
           const r = await fetch('https://min-api.cryptocompare.com/data/price?fsym=AE&tsyms=USD');
           const { USD } = await r.json();
           const foundation = foundations[foundationId].name;
-          const { id_str: tweetId } = await twitter.post('statuses/update', {
+          const { id_str: idStr } = await twitter.post('statuses/update', {
             status: tweetTemplate(screenName, title, amount, USD * amount, foundation, id),
             tweet_mode: 'extended',
           });
-          questions[id].questionTweetId = tweetId;
-          setQuestionTweetId(id, tweetId);
+          questions[id].tweetId = idStr;
+          setQuestionTweetId(id, idStr);
         }
         reopenStream();
       }
