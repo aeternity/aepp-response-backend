@@ -4,16 +4,16 @@ import { usersSearch, usersShow } from './twitter';
 const routes = Router();
 
 const transformUser = ({
-  id_str,
+  id_str: id,
   name,
-  screen_name,
-  profile_image_url_https,
+  screen_name: screenName,
+  profile_image_url_https: imageUrl,
   verified,
 }) => ({
-  id: id_str,
+  id,
   name,
-  screenName: screen_name,
-  imageUrl: profile_image_url_https.replace('_normal', ''),
+  screenName,
+  imageUrl: imageUrl.replace('_normal', ''),
   verified,
 });
 

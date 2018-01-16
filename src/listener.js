@@ -93,12 +93,12 @@ const tweetTemplate = (account, title, amount, amountInUSD, foundationName, ques
       if (!answerTweetId && deadlineAt > new Date()) {
         questions[id] = { twitterUserId, deadlineAt, questionTweetId };
         if (!questions[id].questionTweetId) {
-          const { screen_name } = await usersShow(twitterUserId);
+          const { screen_name: screenName } = await usersShow(twitterUserId);
           const r = await fetch('https://min-api.cryptocompare.com/data/price?fsym=AE&tsyms=USD');
           const { USD } = await r.json();
           const foundation = foundations[foundationId].name;
           const { id_str: tweetId } = await twitter.post('statuses/update', {
-            status: tweetTemplate(screen_name, title, amount, USD * amount, foundation, id),
+            status: tweetTemplate(screenName, title, amount, USD * amount, foundation, id),
             tweet_mode: 'extended',
           });
           questions[id].questionTweetId = tweetId;
